@@ -1,0 +1,35 @@
+version: "3"
+services:
+    database_server:
+        image: postgres:13.2-alpine
+        restart: always
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+            POSTGRES_DB: expensy
+        volumes:
+            - postgres:/var/lib/postgresql/data
+    identity_provider:
+        image: quay.io/keycloak/keycloak:12.0.4
+        ports:
+          - 8080:8080
+        environment:
+            KEYCLOAK_USER: ${KEYCLOAK_USER}
+            KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
+    backend:
+        build: ../backend
+        ports:
+            - 8081:8081
+        environment:
+            - CORS_ALLOWED_ORIGINS=http://localhost:4200
+            - DATABASE_URI=r2dbc:postgresql://database_server:5432/expensy
+            - DATABASE_USER=${DATABASE_USER}
+            - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+            - IDENTITY_PROVIDER_URI=http://identity_provider:8080
+        depends_on:
+            - database_server
+            - identity_provider
+volumes:
+  postgres:
+
