@@ -28,8 +28,15 @@ services:
             - DATABASE_PASSWORD=${DATABASE_PASSWORD}
             - IDENTITY_PROVIDER_URI=http://identity_provider:8080
         depends_on:
-            - database_server
             - identity_provider
+            - database_server
+    frontend:
+        build: ../frontend
+        ports:
+            - 4200:80
+        depends_on:
+            - identity_provider
+            - backend
 volumes:
   postgres:
 
